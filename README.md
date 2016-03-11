@@ -56,6 +56,6 @@ func main() {
     doSomethingElseHandler := MiddlewareHandleFunc(doSomethingElse)
 
     chain := middleware.New(getFileSizeHandler, doSomethingElseHandler).ThenFunc(doWork)
-    chain.call(env)
+    chain.Call(env)
 }
 ```
