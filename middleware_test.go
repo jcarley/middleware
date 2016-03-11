@@ -56,11 +56,20 @@ func TestThenFuncTreatsNilAsDefaultMiddlewareHandler(t *testing.T) {
 }
 
 func TestThenFuncConstructsMiddlewareHandlerFunc(t *testing.T) {
-	fn := MiddlewareHandlerFunc(func(env map[string]interface{}) {
-		env["result"] = "help"
+
+	fn1 := func(h MiddlewareHandler) MiddlewareHandler {
+		return MiddlewareHandlerFunc(func(env map[string]interface{}) {
+			env["result"] = "help"
+		})
+	}
+
+	fn2 := MiddlewareHandlerFunc(func(env map[string]interface{}) {
+		env["name"] = "Fred"
 	})
+
 	env := make(map[string]interface{})
-	chained := New().ThenFunc(fn)
+	chained := New(fn1).ThenFunc(fn2)
 	chained.Call(env)
 	assert.Equal(t, "help", env["result"])
+	assert.Equal(t, "Fred", env["name"])
 }
