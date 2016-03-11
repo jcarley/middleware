@@ -38,6 +38,10 @@ func getFileSize(env map[string]interface{}) {
   env["newResult"] = "Result"
 }
 
+func doSomethingElse(env map[string]interface{}) {
+  // ... do some other work
+}
+
 func doWork(env map[string]interface{}) {
   result := env["newResult"];
   // ... log it somewhere
@@ -48,7 +52,10 @@ func main() {
     env := make(map[string]interface{})
     env["initialState"] = "somevalue"
 
-    chain := middleware.New(getFileSize).ThenFunc(doWork)
+    getFileSizeHandler := MiddlewareHandleFunc(getFileSize)
+    doSomethingElseHandler := MiddlewareHandleFunc(doSomethingElse)
+
+    chain := middleware.New(getFileSizeHandler, doSomethingElseHandler).ThenFunc(doWork)
     chain.call(env)
 }
 ```
