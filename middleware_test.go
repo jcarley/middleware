@@ -16,60 +16,35 @@ func funcsEqual(f1, f2 interface{}) bool {
 	return val1.Pointer() == val2.Pointer()
 }
 
-var testApp = MiddlewareHandlerFunc(func(env map[string]interface{}) {
+var testApp = MiddlewareHandlerFunc(func(env map[string]interface{}, next MiddlewareHandler) {
 	fmt.Println("")
 })
 
-// Tests creating a new chain
-func TestNew(t *testing.T) {
-	c1 := func(h MiddlewareHandler) MiddlewareHandler {
-		return nil
-	}
-	c2 := func(h MiddlewareHandler) MiddlewareHandler {
-		return nil
-	}
-
-	slice := []Constructor{c1, c2}
-
-	chain := New(slice...)
-	assert.True(t, funcsEqual(chain.constructors[0], slice[0]))
-	assert.True(t, funcsEqual(chain.constructors[1], slice[1]))
+func TestNewTreatsNilAsEmpty(t *testing.T) {
+	chain := New()
+	assert.True(t, chain.links == defaultMiddlewareLink)
 }
 
-func TestThenWorksWithNoMiddleware(t *testing.T) {
-	assert.NotPanics(t, func() {
-		chain := New()
-		final := chain.Then(testApp)
+func TestUse(t *testing.T) {
+	c1 := func(env map[string]interface{}, h MiddlewareHandler) {}
+	c2 := func(env map[string]interface{}, h MiddlewareHandler) {}
 
-		assert.True(t, funcsEqual(final, testApp))
-	})
+	slice := []MiddlewareHandlerFunc{c1, c2}
+
+	chain := New()
+	chain.Use(slice[0])
+	chain.Use(slice[1])
+	assert.True(t, funcsEqual(chain.handlers[0], slice[0]))
+	assert.True(t, funcsEqual(chain.handlers[1], slice[1]))
 }
 
-func TestThenTreatsNilAsDefaultMiddlewareHandler(t *testing.T) {
-	chained := New().Then(nil)
-	assert.Equal(t, chained, DefaultMiddlewareHandler)
-}
+func TestUseFunc(t *testing.T) {
+	c1 := func(env map[string]interface{}, h MiddlewareHandler) {}
+	c2 := func(env map[string]interface{}, h MiddlewareHandler) {}
 
-func TestThenFuncTreatsNilAsDefaultMiddlewareHandler(t *testing.T) {
-	chained := New().ThenFunc(nil)
-	assert.Equal(t, chained, DefaultMiddlewareHandler)
-}
-
-func TestThenFuncConstructsMiddlewareHandlerFunc(t *testing.T) {
-
-	fn1 := func(h MiddlewareHandler) MiddlewareHandler {
-		return MiddlewareHandlerFunc(func(env map[string]interface{}) {
-			env["result"] = "help"
-		})
-	}
-
-	fn2 := MiddlewareHandlerFunc(func(env map[string]interface{}) {
-		env["name"] = "Fred"
-	})
-
-	env := make(map[string]interface{})
-	chained := New(fn1).ThenFunc(fn2)
-	chained.Call(env)
-	assert.Equal(t, "help", env["result"])
-	assert.Equal(t, "Fred", env["name"])
+	chain := New()
+	chain.UseFunc(c1)
+	chain.UseFunc(c2)
+	assert.True(t, funcsEqual(chain.handlers[0], MiddlewareHandlerFunc(c1)))
+	assert.True(t, funcsEqual(chain.handlers[1], MiddlewareHandlerFunc(c2)))
 }
