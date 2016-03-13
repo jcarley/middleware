@@ -16,14 +16,24 @@ to
 There are several middleware solutions out there, but all that I've found deal
 primarily with HTTP.  I wanted something where I could use generic non-HTTP
 specific middleware components.  This project is influenced by
-https://github.com/mitchellh/middleware and https://github.com/justinas/alice
+https://github.com/mitchellh/middleware and https://github.com/codegangsta/negroni
 
 ### Usage
 
+Install the package with
+
+    go get github.com/jcarley/middleware
+
+Then import
+
+    import "github.com/jcarley/middleware"
+
 Your middleware handlers should have the form of
 
-    func(env map[string]interface{}, next MiddlewareHandler)
+    func(env map[string]interface{}, middleware.HandlerFunc)
 
+
+Example
 
 ```go
 package main
