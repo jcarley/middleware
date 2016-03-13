@@ -16,7 +16,7 @@ func funcsEqual(f1, f2 interface{}) bool {
 	return val1.Pointer() == val2.Pointer()
 }
 
-var testApp = MiddlewareHandlerFunc(func(env map[string]interface{}, next MiddlewareHandler) {
+var testApp = MiddlewareHandlerFunc(func(env map[string]interface{}, next MiddlewareHandlerFunc) {
 	fmt.Println("")
 })
 
@@ -26,8 +26,8 @@ func TestNewTreatsNilAsEmpty(t *testing.T) {
 }
 
 func TestUse(t *testing.T) {
-	c1 := func(env map[string]interface{}, h MiddlewareHandler) {}
-	c2 := func(env map[string]interface{}, h MiddlewareHandler) {}
+	c1 := func(env map[string]interface{}, h MiddlewareHandlerFunc) {}
+	c2 := func(env map[string]interface{}, h MiddlewareHandlerFunc) {}
 
 	slice := []MiddlewareHandlerFunc{c1, c2}
 
@@ -39,8 +39,8 @@ func TestUse(t *testing.T) {
 }
 
 func TestUseFunc(t *testing.T) {
-	c1 := func(env map[string]interface{}, h MiddlewareHandler) {}
-	c2 := func(env map[string]interface{}, h MiddlewareHandler) {}
+	c1 := func(env map[string]interface{}, h MiddlewareHandlerFunc) {}
+	c2 := func(env map[string]interface{}, h MiddlewareHandlerFunc) {}
 
 	chain := New()
 	chain.UseFunc(c1)

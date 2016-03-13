@@ -3,15 +3,15 @@ package middleware
 // A handler that responds to a arbitrary request
 // Call should write state changes to the map
 type MiddlewareHandler interface {
-	Call(env map[string]interface{}, next MiddlewareHandler)
+	Call(env map[string]interface{}, next MiddlewareHandlerFunc)
 }
 
 // The MiddlewareHandlerFunc type is an adapter to allow the use of ordinary
 // functions as MiddlewareHandler handlers. If f is a function with the
 // appropriate signature, MiddlewareHandlerFunc(f) is a MiddlewareHandler that calls f.
-type MiddlewareHandlerFunc func(env map[string]interface{}, next MiddlewareHandler)
+type MiddlewareHandlerFunc func(env map[string]interface{}, next MiddlewareHandlerFunc)
 
-func (f MiddlewareHandlerFunc) Call(env map[string]interface{}, next MiddlewareHandler) {
+func (f MiddlewareHandlerFunc) Call(env map[string]interface{}, next MiddlewareHandlerFunc) {
 	f(env, next)
 }
 
@@ -45,7 +45,7 @@ func (c *Chain) Use(handler MiddlewareHandler) {
 	c.links = build(c.handlers)
 }
 
-func (c *Chain) UseFunc(h func(env map[string]interface{}, next MiddlewareHandler)) {
+func (c *Chain) UseFunc(h func(env map[string]interface{}, next MiddlewareHandlerFunc)) {
 	c.Use(MiddlewareHandlerFunc(h))
 }
 
@@ -66,7 +66,7 @@ func build(handlers []MiddlewareHandler) link {
 type NoopMiddlewareHandler struct {
 }
 
-func (h NoopMiddlewareHandler) Call(env map[string]interface{}, next MiddlewareHandler) {
+func (h NoopMiddlewareHandler) Call(env map[string]interface{}, next MiddlewareHandlerFunc) {
 	// noop
 }
 
