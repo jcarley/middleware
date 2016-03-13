@@ -9,7 +9,7 @@ In short, it transforms
 
 to
 
-    middleware.New(Middleware1, Middleware2, Middleware3).Then(App)
+    middleware.New(Middleware1, Middleware2, Middleware3)
 
 ### Why?
 
@@ -20,9 +20,9 @@ https://github.com/mitchellh/middleware and https://github.com/justinas/alice
 
 ### Usage
 
-Your middleware constructors should have the form of
+Your middleware handlers should have the form of
 
-    func (middleware.MiddlewareHandler) middleware.MiddlewareHandler
+    func(env map[string]interface{}, next MiddlewareHandler)
 
 
 ```go
@@ -32,10 +32,11 @@ import (
     "github.com/jcarley/middleware"
 )
 
-func getFileSize(env map[string]interface{}) {
+func getFileSize(env map[string]interface{}, next MiddlewareHandler) {
   fileSize := env["fileSize"];
   // ... do some work
   env["newResult"] = "Result"
+  next(
 }
 
 func doSomethingElse(env map[string]interface{}) {
