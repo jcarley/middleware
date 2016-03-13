@@ -30,7 +30,7 @@ Then import
 
 Your middleware handlers should have the form of
 
-    func(env map[string]interface{}, middleware.HandlerFunc)
+    func(env map[string]interface{}, next middleware.HandlerFunc)
 
 
 Example
