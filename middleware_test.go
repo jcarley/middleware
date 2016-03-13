@@ -48,3 +48,24 @@ func TestUseFunc(t *testing.T) {
 	assert.True(t, funcsEqual(chain.handlers[0], MiddlewareHandlerFunc(c1)))
 	assert.True(t, funcsEqual(chain.handlers[1], MiddlewareHandlerFunc(c2)))
 }
+
+func TestCallingChain(t *testing.T) {
+	c1 := func(env map[string]interface{}, h HandlerFunc) {
+		env["result"] = "hello"
+		h(env)
+	}
+	c2 := func(env map[string]interface{}, h HandlerFunc) {
+		env["fileSize"] = 1000
+		h(env)
+	}
+
+	chain := New()
+	chain.UseFunc(c1)
+	chain.UseFunc(c2)
+
+	env := make(map[string]interface{})
+	chain.Call(env)
+
+	assert.True(t, env["result"] == "hello")
+	assert.True(t, env["fileSize"] == 1000)
+}
