@@ -50,12 +50,16 @@ func getFileSize(env map[string]interface{}, next middleware.HandlerFunc) {
 
 func doSomethingElse(env map[string]interface{}, next middleware.HandlerFunc) {
   // ... do some other work
+  env["newResult"] = "successful"
   next(env)
 }
 
 func doWork(env map[string]interface{}, next middleware.HandlerFunc) {
-  result := env["newResult"];
-  // ... log it somewhere
+  initialState := env["initialState"]
+  newResult := env["newResult"];
+
+  // ... log initialState and newResult
+
   next(env)
 }
 
