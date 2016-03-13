@@ -1,23 +1,37 @@
 package middleware
 
+type Handler interface {
+	Call(env map[string]interface{})
+}
+
+type HandlerFunc func(env map[string]interface{})
+
+func (h HandlerFunc) Call(env map[string]interface{}) {
+	h(env)
+}
+
 // A handler that responds to a arbitrary request
 // Call should write state changes to the map
 type MiddlewareHandler interface {
-	Call(env map[string]interface{}, next MiddlewareHandlerFunc)
+	Call(env map[string]interface{}, next HandlerFunc)
 }
 
 // The MiddlewareHandlerFunc type is an adapter to allow the use of ordinary
 // functions as MiddlewareHandler handlers. If f is a function with the
 // appropriate signature, MiddlewareHandlerFunc(f) is a MiddlewareHandler that calls f.
-type MiddlewareHandlerFunc func(env map[string]interface{}, next MiddlewareHandlerFunc)
+type MiddlewareHandlerFunc func(env map[string]interface{}, next HandlerFunc)
 
-func (f MiddlewareHandlerFunc) Call(env map[string]interface{}, next MiddlewareHandlerFunc) {
+func (f MiddlewareHandlerFunc) Call(env map[string]interface{}, next HandlerFunc) {
 	f(env, next)
 }
 
 type link struct {
 	handler MiddlewareHandler
 	next    *link
+}
+
+func (l link) Call(env map[string]interface{}) {
+	l.handler.Call(env, l.next.Call)
 }
 
 // Chain acts as a list of MiddlewareHandler constructors.
@@ -40,12 +54,16 @@ func New(handlers ...MiddlewareHandler) *Chain {
 	}
 }
 
+func (c *Chain) Call(env map[string]interface{}) {
+	c.links.Call(env)
+}
+
 func (c *Chain) Use(handler MiddlewareHandler) {
 	c.handlers = append(c.handlers, handler)
 	c.links = build(c.handlers)
 }
 
-func (c *Chain) UseFunc(h func(env map[string]interface{}, next MiddlewareHandlerFunc)) {
+func (c *Chain) UseFunc(h func(env map[string]interface{}, next HandlerFunc)) {
 	c.Use(MiddlewareHandlerFunc(h))
 }
 
@@ -66,7 +84,7 @@ func build(handlers []MiddlewareHandler) link {
 type NoopMiddlewareHandler struct {
 }
 
-func (h NoopMiddlewareHandler) Call(env map[string]interface{}, next MiddlewareHandlerFunc) {
+func (h NoopMiddlewareHandler) Call(env map[string]interface{}, next HandlerFunc) {
 	// noop
 }
 
