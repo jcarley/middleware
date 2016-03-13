@@ -68,7 +68,7 @@ func main() {
     env := make(map[string]interface{})
     env["initialState"] = "somevalue"
 
-    chain := New()
+    chain := middleware.New()
     chain.UseFunc(getFileSizeHandler)
     chain.UseFunc(doSomethingElseHandler)
     chain.UseFunc(doWork)
