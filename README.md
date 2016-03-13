@@ -32,20 +32,21 @@ import (
     "github.com/jcarley/middleware"
 )
 
-func getFileSize(env map[string]interface{}, next MiddlewareHandler) {
-  fileSize := env["fileSize"];
+func getFileSize(env map[string]interface{}, next middleware.HandlerFunc) {
   // ... do some work
-  env["newResult"] = "Result"
-  next(
+  env["fileSize"] = 1000
+  next(env)
 }
 
-func doSomethingElse(env map[string]interface{}) {
+func doSomethingElse(env map[string]interface{}, next middleware.HandlerFunc) {
   // ... do some other work
+  next(env)
 }
 
-func doWork(env map[string]interface{}) {
+func doWork(env map[string]interface{}, next middleware.HandlerFunc) {
   result := env["newResult"];
   // ... log it somewhere
+  next(env)
 }
 
 func main() {
@@ -53,10 +54,10 @@ func main() {
     env := make(map[string]interface{})
     env["initialState"] = "somevalue"
 
-    getFileSizeHandler := MiddlewareHandleFunc(getFileSize)
-    doSomethingElseHandler := MiddlewareHandleFunc(doSomethingElse)
-
-    chain := middleware.New(getFileSizeHandler, doSomethingElseHandler).ThenFunc(doWork)
+    chain := New()
+    chain.UseFunc(getFileSizeHandler)
+    chain.UseFunc(doSomethingElseHandler)
+    chain.UseFunc(doWork)
     chain.Call(env)
 }
 ```
