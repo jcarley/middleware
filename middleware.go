@@ -47,10 +47,17 @@ type Chain struct {
 // memorizing the given list of middleware constructors.
 // New serves no other function,
 // constructors are only called upon a call to Then().
-func New(handlers ...MiddlewareHandler) *Chain {
+func New(handlers ...func(map[string]interface{}, HandlerFunc)) *Chain {
+
+	var middlewareHandlers []MiddlewareHandler
+
+	for _, h := range handlers {
+		middlewareHandlers = append(middlewareHandlers, MiddlewareHandlerFunc(h))
+	}
+
 	return &Chain{
-		handlers: handlers,
-		links:    build(handlers),
+		handlers: middlewareHandlers,
+		links:    build(middlewareHandlers),
 	}
 }
 

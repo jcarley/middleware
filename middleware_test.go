@@ -25,6 +25,35 @@ func TestNewTreatsNilAsEmpty(t *testing.T) {
 	assert.True(t, chain.links == defaultMiddlewareLink)
 }
 
+func TestNewTakesFuncs(t *testing.T) {
+	c1 := func(env map[string]interface{}, h HandlerFunc) {}
+	c2 := func(env map[string]interface{}, h HandlerFunc) {}
+
+	chain := New(c1, c2)
+
+	assert.True(t, funcsEqual(chain.handlers[0], c1))
+	assert.True(t, funcsEqual(chain.handlers[1], c2))
+}
+
+func TestCallingChainAfterUsingNew(t *testing.T) {
+	c1 := func(env map[string]interface{}, h HandlerFunc) {
+		env["result"] = "hello"
+		h(env)
+	}
+	c2 := func(env map[string]interface{}, h HandlerFunc) {
+		env["fileSize"] = 1000
+		h(env)
+	}
+
+	chain := New(c1, c2)
+
+	env := make(map[string]interface{})
+	chain.Call(env)
+
+	assert.True(t, env["result"] == "hello")
+	assert.True(t, env["fileSize"] == 1000)
+}
+
 func TestUse(t *testing.T) {
 	c1 := func(env map[string]interface{}, h HandlerFunc) {}
 	c2 := func(env map[string]interface{}, h HandlerFunc) {}
