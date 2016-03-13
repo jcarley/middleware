@@ -1,5 +1,7 @@
 # Middleware
 
+[![Build Status](https://travis-ci.org/jcarley/middleware.svg?branch=master)](https://travis-ci.org/jcarley/middleware)
+
 Middleware provides a convenient way to chain
 generic middleware functions.
 
