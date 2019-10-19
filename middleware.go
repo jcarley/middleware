@@ -65,13 +65,17 @@ func (c *Chain) Call(env map[string]interface{}) {
 	c.links.Call(env)
 }
 
-func (c *Chain) Use(handler MiddlewareHandler) {
-	c.handlers = append(c.handlers, handler)
-	c.links = build(c.handlers)
+func (c *Chain) Use(handlers ...MiddlewareHandler) {
+	for _, handler := range handlers {
+		c.handlers = append(c.handlers, handler)
+		c.links = build(c.handlers)
+	}
 }
 
-func (c *Chain) UseFunc(h func(env map[string]interface{}, next HandlerFunc)) {
-	c.Use(MiddlewareHandlerFunc(h))
+func (c *Chain) UseFunc(handlers ...func(env map[string]interface{}, next HandlerFunc)) {
+	for _, handler := range handlers {
+		c.Use(MiddlewareHandlerFunc(handler))
+	}
 }
 
 func build(handlers []MiddlewareHandler) link {

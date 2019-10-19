@@ -55,14 +55,13 @@ func TestCallingChainAfterUsingNew(t *testing.T) {
 }
 
 func TestUse(t *testing.T) {
-	c1 := func(env map[string]interface{}, h HandlerFunc) {}
-	c2 := func(env map[string]interface{}, h HandlerFunc) {}
+	c1 := MiddlewareHandlerFunc(func(env map[string]interface{}, h HandlerFunc) {})
+	c2 := MiddlewareHandlerFunc(func(env map[string]interface{}, h HandlerFunc) {})
 
-	slice := []MiddlewareHandlerFunc{c1, c2}
+	slice := []MiddlewareHandler{c1, c2}
 
 	chain := New()
-	chain.Use(slice[0])
-	chain.Use(slice[1])
+	chain.Use(slice...)
 	assert.True(t, funcsEqual(chain.handlers[0], slice[0]))
 	assert.True(t, funcsEqual(chain.handlers[1], slice[1]))
 }
@@ -72,8 +71,7 @@ func TestUseFunc(t *testing.T) {
 	c2 := func(env map[string]interface{}, h HandlerFunc) {}
 
 	chain := New()
-	chain.UseFunc(c1)
-	chain.UseFunc(c2)
+	chain.UseFunc(c1, c2)
 	assert.True(t, funcsEqual(chain.handlers[0], MiddlewareHandlerFunc(c1)))
 	assert.True(t, funcsEqual(chain.handlers[1], MiddlewareHandlerFunc(c2)))
 }
@@ -89,8 +87,7 @@ func TestCallingChain(t *testing.T) {
 	}
 
 	chain := New()
-	chain.UseFunc(c1)
-	chain.UseFunc(c2)
+	chain.UseFunc(c1, c2)
 
 	env := make(map[string]interface{})
 	chain.Call(env)
