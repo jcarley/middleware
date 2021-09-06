@@ -4,6 +4,4 @@ install:
   - go get github.com/stretchr/testify/assert
 
 go:
-  - 1.11
-  - 1.12
-  - 1.13
+  - 1.17
